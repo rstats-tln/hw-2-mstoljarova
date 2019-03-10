@@ -24,15 +24,110 @@ ggplot(data = mpg) +
 
 What are the advantages to using faceting instead of the colour aesthetic? What are the disadvantages? How might the balance change if you had a larger dataset?
 
+MS: 
+variable per category can be seen separately and it is easy to analyze (especially the amount) as the values do not overlap; 
+
+by overlapping variable values, in some cases, it is easier to compare them; 
+
+with the larger dataset the analysis without faveting will be more complicated as more values will be together
+
 - Recreate the R code necessary to generate the following graphs.
 
 ```{r, out.width=200}
 knitr::include_graphics(paste0("plots/fig", 1:6, ".png"))
 ```
 
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth(mapping = aes (group = drv), se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(mapping = aes (group = drv), se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes (color = drv)) + 
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes (color = drv)) + 
+  geom_smooth(mapping = aes (linetype = drv), se = FALSE)
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, colour = drv)) + 
+  geom_point(stroke = 1, colour = "white") + 
+  geom_point(size = 1)
+```
+
+
+
+
 - Most geoms and stats come in pairs that are almost always used in concert. Read through the documentation and make a list of all the pairs. What do they have in common?
 
+MS: 
+
+| geom                | stat                |
+|---------------------|---------------------|
+| `geom_bar()`        | `stat_count()`      |
+| `geom_bin2d()`      | `stat_bin_2d()`     |
+| `geom_boxplot()`    | `stat_boxplot()`    |
+| `geom_contour()`    | `stat_contour()`    |
+| `geom_count()`      | `stat_sum()`        |
+| `geom_density()`    | `stat_density()`    |
+| `geom_density_2d()` | `stat_density_2d()` |
+| `geom_hex()`        | `stat_hex()`        |
+| `geom_freqpoly()`   | `stat_bin()`        |
+| `geom_histogram()`  | `stat_bin()`        |
+| `geom_qq_line()`    | `stat_qq_line()`    |
+| `geom_qq()`         | `stat_qq()`         |
+| `geom_quantile()`   | `stat_quantile()`   |
+| `geom_smooth()`     | `stat_smooth()`     |
+| `geom_violin()`     | `stat_violin()`     |
+| `geom_sf()`         | `stat_sf()`         |
+
+Table: Complementary geoms and stats
+
+
+
 - Compare and contrast geom_jitter() with geom_count().
+
+MS:
+Geom_jitter - The jitter geom is a convenient shortcut for geom_point(position = "jitter"). It adds a small amount of random variation to the location of each point, and is a useful way of handling overplotting caused by discreteness in smaller datasets.
+
+Geom_count - This is a variant geom_point() that counts the number of observations at each location, then maps the count to point area. It useful when you have discrete data and overplotting.
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point()
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_jitter()
+```
+
+```{r}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_count()
+```
+
+
+
+
 
 - What does the plot below tell you about the relationship between city and highway mpg (fuel consumption)? Why is coord_fixed() important? What does geom_abline() do?
 
@@ -43,7 +138,21 @@ ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
   coord_fixed()
 ```
 
+
+MS:
+The consumption of fuel on the hwy and city is linear - cars consuming more fuel on the hwy, consume more fuel in the cty and visa versa. 
+
+Abline - These geoms add reference lines (sometimes called rules) to a plot, either horizontal, vertical, or diagonal (specified by slope and intercept). These are useful for annotating plots.
+
+Coord_fixed - A fixed scale coordinate system forces a specified ratio between the physical representation of data units on the axes. The ratio represents the number of units on the y-axis equivalent to one unit on the x-axis. The default, ratio = 1, ensures that one unit on the x-axis is the same length as one unit on the y-axis. Ratios higher than one make units on the y axis longer than units on the x-axis, and vice versa. This is similar to MASS::eqscplot(), but it works for all types of graphics.
+
+Coord-fixed is important for fixing the x- and y-axis into teh same units. 
+
+
+
+
 - What is the default geom associated with stat_summary()?
+MS: pointrange
 
 ```{r}
 ggplot(data = diamonds) + 
@@ -57,15 +166,55 @@ ggplot(data = diamonds) +
 
 How could you rewrite the previous plot to use that geom function instead of the stat function?
  
+```{r}
+ggplot(data = diamonds) + 
+  geom_pointrange(mapping = aes(x= cut, y=depth, ymin = depth, ymax = depth))
+  
+``` 
+
  
 - What does geom_col() do? How is it different to geom_bar()?
+MS: 
+There are two types of bar charts: geom_bar() and geom_col(). geom_bar() makes the height of the bar proportional to the number of cases in each group (or if the weight aesthetic is supplied, the sum of the weights). If you want the heights of the bars to represent values in the data, use geom_col() instead. geom_bar() uses stat_count() by default: it counts the number of cases at each x position. geom_col() uses stat_identity(): it leaves the data as is.
+
+geom_bar - bar size is the proportional value of the sum
+geom_col - each bar represents the value, in other words - bars are infront of each other
+
+
 
 - What variables does stat_smooth() compute? What parameters control its behaviour?
+
+MS:
+Computed variables
+y - predicted value
+ymin - lower pointwise confidence interval around the mean
+ymax - upper pointwise confidence interval around the mean
+se - standard error
+
+Respective arguments control the behaviour. 
+
+
 
 - In our proportion bar chart, we need to set group = 1. Why? In other words what is the problem with these two graphs?
 ```{r}
 ggplot(data = diamonds) + 
   geom_bar(mapping = aes(x = cut, y = ..prop..))
+
 ggplot(data = diamonds) + 
-  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
+  geom_bar(mapping = aes(x = cut, y = ..prop.., fill = color))
 ```
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop.., group = 1))
+
+```
+
+```{r}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y= ..prop.., fill = color, group = 1
+                         )) 
+```
+MS: I can not figure out why adding "Fill= color and group= 1" did work to devide bars by colors?
+
+Without group = 1, R assumes that each x value is a group and the proporsion is 100%. 
